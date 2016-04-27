@@ -54,7 +54,14 @@ class Map
 	end
 	
 	def each_in_box x, y, w, h
-		#assuming w and h are always integers
+	#	Alright, this is probably going to cause some head scratching, but it's simpler than it looks.
+	#	The tiles in the map are aligned to a grid, and their positions are used as the keys to a hash map.
+	#	This means I can optimize collision detection and drawing by making a box around where the 
+	#	tiles can be and getting any values along the grid in that box.  Since accessing a hash map is 
+	#	in constant time, I can draw tiles and do collision checks on maps of any size.  The only thing 
+	# that affects speed is how large a box I need to use and how many things are in the box. A
+	# map of fifty tiles would (theoretically) perform just as quickly as one with a million tiles.
+
 		x = x.to_i
 		y = y.to_i
 		min_x = ( (x-w/2)/@w )*@w + @w/2
@@ -70,7 +77,7 @@ class Map
 				if (tile != nil) then
 					yield tile
 				end
-				y += @w
+				y += @w #the grid is spaced apart by w pixels
 			end
 			x += @w
 		end

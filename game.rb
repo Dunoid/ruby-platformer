@@ -4,6 +4,7 @@ require_relative "actors"
 
 include Gosu
 class GameConsole < TextInput
+#	A developer's console.  It's handy for debugging.
 	Active_Color = 0xdd_ff6666
 	Passive_Color=0xbf_666666
 	Selection_Color = 0xcc_0000ff
@@ -26,7 +27,7 @@ class GameConsole < TextInput
 		@font.height
 	end
 	def filter input
-		input.capitalize
+		input.capitalize #This is a lazy way to forbid executing arbitrary code, since Ruby is case-sensitive
 	end
 	def draw
 		bgcolor = active ? Active_Color : Passive_Color
@@ -58,7 +59,7 @@ end
 class GameWindow < Window
 	def initialize
 		super W_WIDTH, W_HEIGHT, false
-		@offsetY = 80
+		@offsetY = 80	#off-center player from camera for aesthetic appeal
 		@ui_font = Font.new(20)
 		@console = GameConsole.new(@ui_font, 20, W_HEIGHT-40)
 		LOAD_MAP "0_test"
@@ -89,7 +90,8 @@ class GameWindow < Window
 		return if @paused
 		@map.update
 		@player.update
-		#camera controls are going to get insane
+		#camera controls can get pretty crazy
+		#basically, this is just to smooth the camera when it follows the player
 		rx = (@player.x + @player.vx*25 - W_WIDTH/2)  - @camx 
 		ry = (@player.y - W_HEIGHT/2 - @offsetY) - @camy 
 		
@@ -102,9 +104,9 @@ class GameWindow < Window
 		end
 		@camx += rx/20 if(@player.moving || rx.abs > 60)
 		
-		@camx = @camx.to_i
+		@camx = @camx.to_i #all positions are as integers to prevent seams in the world tiles due to floating-point errors
 		@camy = @camy.to_i
-		@paused = true if ($debug > 3)
+		@paused = true if ($debug > 3) #ridiculous frame-by-frame debugging
 	end
 	#NAMES IN ALL CAPS CAN BE ACCESSED BY THE COMMAND LINE
 	def LOAD_MAP mapfile
@@ -131,7 +133,7 @@ class GameWindow < Window
 	def SYSTEM_OVERRIDE
 		$enableconsole = false
 	end
-	def LIGHT_COLOR input
+	def LIGHT_COLOR input #I like to play with the colors
 		@map.lightcolor = Color.new(input.hex.to_i)
 	end
 	def DARK_COLOR input
@@ -158,7 +160,7 @@ class GameWindow < Window
 				self.text_input = nil
 			end
 		elsif @console.active then
-			if id == KbReturn then
+			if id == KbReturn then #It just sends the console text as real code.  Pretty slapdash
 				begin
 					self.send *@console.text.split(" ")
 					@console.text = ""

@@ -5,14 +5,20 @@ VERSION = "Alpha"
 GRAVITY = 1
 W_WIDTH = 900
 W_HEIGHT = 600
-$debug = 0
+$debug = 0			
+# Debug levels:
+#	0: no debug 
+#	1: display debug info (player position and speed, draw calls, etc) on screen 
+#	2: 1 + show collision boxes
+#	3: I forgot to remove this one
+#	4: Pauses every frame for intense debugging
 $enableconsole = true
 
 def get_asset(file)
 	File.join(File.dirname(__FILE__), "assets", VERSION, file)
 end
 
-module Z
+module Z #Z ordering
 	Skybox, World, Debug, Player, UI, Text, Cursor = *0..40
 end
 
@@ -62,12 +68,10 @@ class CircleCollider
 	def collision? collider
 		if collider.respond_to?(:radius) then
 			Math.sqrt( (collider.x-@x)**2 + (collider.y-@y)**2 ) <= collider.radius + @radius
-		else
+		else #I'll let you work through the geometry
 			dist = @radius/Math.sqrt( (collider.x-@x)**2 + (collider.y-@y)**2 ) 
-			colx = (@x + (collider.x - @x)*dist - collider.x).abs <= collider.w/2
-			if colx then
-				coly = (@y + (collider.y - @y)*dist - collider.y).abs <= collider.w/2
-				colx && coly
+			if (@x + (collider.x - @x)*dist - collider.x).abs <= collider.w/2 then
+				(@y + (collider.y - @y)*dist - collider.y).abs <= collider.h/2
 			else
 				false
 			end
